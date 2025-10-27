@@ -4,7 +4,7 @@
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "theme_color": "#fe3d02",
   "description": "A simple and elegant to-do list app with dark mode",
   "orientation": "portrait",
   "icons": [
