@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff4b5c">
+
   <title>To-Do List</title>
   <style>
     body {
@@ -319,27 +320,45 @@
     const addButton = document.getElementById('addButton');
     const taskList = document.getElementById('taskList');
 
-    function addTask() {
-      const taskText = taskInput.value.trim();
-      
-      if (taskText === '') {
-        taskInput.focus();
-        return;
+    // Load tasks from localStorage on page load
+    function loadTasks() {
+      const savedTasks = localStorage.getItem('todoTasks');
+      if (savedTasks) {
+        const tasks = JSON.parse(savedTasks);
+        tasks.forEach(task => {
+          createTaskElement(task.id, task.text, task.completed);
+        });
+        taskCounter = tasks.length > 0 ? Math.max(...tasks.map(t => parseInt(t.id.split('-')[1]))) : 0;
       }
+    }
 
+    // Save tasks to localStorage
+    function saveTasks() {
+      const tasks = [];
+      document.querySelectorAll('.task-item').forEach(item => {
+        const checkbox = item.querySelector('.task-checkbox');
+        const text = item.querySelector('.checkbox-text').textContent;
+        tasks.push({
+          id: checkbox.id,
+          text: text,
+          completed: checkbox.checked
+        });
+      });
+      localStorage.setItem('todoTasks', JSON.stringify(tasks));
+    }
+
+    // Create task element
+    function createTaskElement(taskId, taskText, isCompleted = false) {
       // Remove empty state if it exists
       const emptyState = taskList.querySelector('.empty-state');
       if (emptyState) {
         emptyState.remove();
       }
 
-      taskCounter++;
-      const taskId = `task-${taskCounter}`;
-
       const taskItem = document.createElement('div');
       taskItem.className = 'task-item';
       taskItem.innerHTML = `
-        <input type="checkbox" id="${taskId}" class="task-checkbox" />
+        <input type="checkbox" id="${taskId}" class="task-checkbox" ${isCompleted ? 'checked' : ''} />
         <label for="${taskId}" class="checkbox-label">
           <div class="checkbox-box">
             <div class="checkbox-fill"></div>
@@ -356,6 +375,26 @@
       `;
 
       taskList.appendChild(taskItem);
+
+      // Add change listener to save when checkbox is toggled
+      const checkbox = taskItem.querySelector('.task-checkbox');
+      checkbox.addEventListener('change', saveTasks);
+    }
+
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      
+      if (taskText === '') {
+        taskInput.focus();
+        return;
+      }
+
+      taskCounter++;
+      const taskId = `task-${taskCounter}`;
+
+      createTaskElement(taskId, taskText, false);
+      saveTasks();
+      
       taskInput.value = '';
       taskInput.focus();
     }
@@ -365,6 +404,7 @@
       taskItem.style.animation = 'slideIn 0.3s ease-out reverse';
       setTimeout(() => {
         taskItem.remove();
+        saveTasks();
         
         // Show empty state if no tasks left
         if (taskList.children.length === 0) {
@@ -380,11 +420,16 @@
         addTask();
       }
     });
-    
-   if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker Registered'))
-    .catch(err => console.log('SW registration failed:', err));}
+
+    // Load saved tasks when page loads
+    loadTasks();
+
+    // Service Worker registration (if you have one)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.log('SW registration failed:', err));
+    }
   </script>
 </body>
 </html>
