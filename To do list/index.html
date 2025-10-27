@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .todo-container {
+      width: 90%;
+      max-width: 500px;
+      padding: 30px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin: 0 0 24px 0;
+      font-size: 28px;
+      color: #111827;
+      font-weight: 700;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    #taskInput {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    #taskInput:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    #addButton {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #addButton:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    #addButton:active {
+      transform: translateY(0);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-item {
+      user-select: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .task-checkbox {
+      display: none;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: #374151;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      padding: 12px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .checkbox-label:hover {
+      background: rgba(16, 185, 129, 0.05);
+      color: #111827;
+    }
+
+    .checkbox-box {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #d1d5db;
+      border-radius: 6px;
+      margin-right: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    .checkbox-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transform: scale(0);
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border-radius: 4px;
+      opacity: 0;
+    }
+
+    .checkmark {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: scale(0.3) rotate(20deg);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .check-icon {
+      width: 14px;
+      height: 14px;
+      fill: white;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    .success-ripple {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(16, 185, 129, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .checkbox-text {
+      transition: all 0.3s ease;
+      position: relative;
+      flex: 1;
+    }
+
+    .checkbox-text::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #6b7280;
+      transition: width 0.4s ease;
+      transform: translateY(-50%);
+    }
+
+    .delete-btn {
+      opacity: 0;
+      padding: 4px 8px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      margin-left: 8px;
+    }
+
+    .checkbox-label:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: #dc2626;
+    }
+
+    .checkbox-label:hover .checkbox-box {
+      border-color: #10b981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    }
+
+    .task-checkbox:checked + .checkbox-label .checkbox-box {
+      border-color: #10b981;
+      background: #10b981;
+      box-shadow:
+        0 4px 12px rgba(16, 185, 129, 0.3),
+        0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    .task-checkbox:checked + .checkbox-label .checkbox-fill {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .task-checkbox:checked + .checkbox-label .checkmark {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      animation: checkPop 0.3s ease-out 0.2s;
+    }
+
+    .task-checkbox:checked + .checkbox-label .success-ripple {
+      animation: rippleSuccess 0.6s ease-out;
+    }
+
+    .task-checkbox:checked + .checkbox-label .checkbox-text {
+      color: #6b7280;
+    }
+
+    .task-checkbox:checked + .checkbox-label .checkbox-text::after {
+      width: 100%;
+    }
+
+    .checkbox-label:active .checkbox-box {
+      transform: scale(0.95);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #9ca3af;
+      font-size: 16px;
+    }
+
+    @keyframes checkPop {
+      0% {
+        transform: scale(1) rotate(0deg);
+      }
+      50% {
+        transform: scale(1.2) rotate(-5deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes rippleSuccess {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 0.6;
+      }
+      70% {
+        width: 50px;
+        height: 50px;
+        opacity: 0.3;
+      }
+      100% {
+        width: 60px;
+        height: 60px;
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h1>My To-Do List</h1>
+    
+    <div class="input-container">
+      <input 
+        type="text" 
+        id="taskInput" 
+        placeholder="What are we doing ?"
+        autocomplete="off"
+      />
+      <button id="addButton">Add</button>
+    </div>
+
+    <div id="taskList" class="task-list">
+      <div class="empty-state">No tasks yet. Add one above!</div>
+    </div>
+  </div>
+
+  <script>
+    let taskCounter = 0;
+    const taskInput = document.getElementById('taskInput');
+    const addButton = document.getElementById('addButton');
+    const taskList = document.getElementById('taskList');
+
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      
+      if (taskText === '') {
+        taskInput.focus();
+        return;
+      }
+
+      // Remove empty state if it exists
+      const emptyState = taskList.querySelector('.empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+
+      taskCounter++;
+      const taskId = `task-${taskCounter}`;
+
+      const taskItem = document.createElement('div');
+      taskItem.className = 'task-item';
+      taskItem.innerHTML = `
+        <input type="checkbox" id="${taskId}" class="task-checkbox" />
+        <label for="${taskId}" class="checkbox-label">
+          <div class="checkbox-box">
+            <div class="checkbox-fill"></div>
+            <div class="checkmark">
+              <svg viewBox="0 0 24 24" class="check-icon">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path>
+              </svg>
+            </div>
+            <div class="success-ripple"></div>
+          </div>
+          <span class="checkbox-text">${taskText}</span>
+          <button class="delete-btn" onclick="deleteTask(this)">Delete</button>
+        </label>
+      `;
+
+      taskList.appendChild(taskItem);
+      taskInput.value = '';
+      taskInput.focus();
+    }
+
+    function deleteTask(button) {
+      const taskItem = button.closest('.task-item');
+      taskItem.style.animation = 'slideIn 0.3s ease-out reverse';
+      setTimeout(() => {
+        taskItem.remove();
+        
+        // Show empty state if no tasks left
+        if (taskList.children.length === 0) {
+          taskList.innerHTML = '<div class="empty-state">No tasks yet. Add one above!</div>';
+        }
+      }, 300);
+    }
+
+    addButton.addEventListener('click', addTask);
+    
+    taskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addTask();
+      }
+    });
+  </script>
+</body>
+</html>
