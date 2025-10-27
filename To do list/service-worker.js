@@ -1,14 +1,33 @@
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('todo-cache').then((cache) => {
+    caches.open('todo-cache-v1').then((cache) => {
       return cache.addAll([
         './',
         './index.html',
-        './style.css'
+        './manifest.json',
+        './icons/icon-192.png'
+        // Removed './style.css' since your CSS is in index.html
       ]);
     })
   );
   console.log('Service Worker installed.');
+});
+
+self.addEventListener('activate', (event) => {
+  // Clean up old caches
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== 'todo-cache-v1') {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  console.log('Service Worker activated.');
 });
 
 self.addEventListener('fetch', (event) => {
