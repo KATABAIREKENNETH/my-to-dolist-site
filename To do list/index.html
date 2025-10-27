@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff4b5c">
+  <meta name="theme-color" content="#10b981" id="theme-color-meta">
   <title>To-Do List</title>
   <style>
     :root {
@@ -505,6 +506,19 @@
         addTask();
       }
     });
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      // Update theme color for mobile browsers
+      const metaTheme = document.getElementById('theme-color-meta');
+      if (metaTheme) {
+        metaTheme.content = newTheme === 'dark' ? '#0f3460' : '#10b981';
+      }
+    }
 
     // Load theme and tasks when page loads
     loadTheme();
